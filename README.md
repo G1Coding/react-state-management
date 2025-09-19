@@ -1,2 +1,1 @@
-# reimagined-octo-palm-tree
-상태관리 실습 - Context API, Redux, MobX, Recoil, Zustand
+상태관리 - Context API, Redux, MobX, Recoil, Zustand

@@ -1,33 +1,60 @@
-import {createContext, useMemo, useState} from 'react';
+import { createContext, useMemo, useState, useEffect } from "react";
 
-const OrderContext = createContext();
+export const OrderContext = createContext();
 
 export function OrderContextProvider(props) {
+  const [orderCounts, setOrderCounts] = useState({
+    products: new Map(),
+    options: new Map(),
+  });
 
-    const [orderCounts, setOrderCounts] = useState({
-        products: new Map(),
-        options: new Map()
-    })
+  // 전체 가격 계산
+  const [totals, setTotals] = useState({
+    products: 0,
+    options: 0,
+    total: 0,
+  });
 
-    // 상품 주문 갯수가 변경될 때만 리렌더링이 되도록 useMemo 사용
-    const value = useMemo(() => {
+  // 옵션 별 가격표
+  const pricePerItem = {
+    products: 1000,
+    options: 500
+  }
 
-        // 상품, 주문 갯수의 변경을 업데이트 해주는 함수
-        function updateItemCount(itemName, newItemCount, orderType) {
-            const newOrderCounts = {...orderCounts};
+  // 옵션의 총(옵션의 종류*갯수) 가격 계산
+  const calculateSubtotal = (orderType, orderCounts) => {
+    let optionCount = 0;
+    for(const count of orderCounts[orderType].values()) {
+        optionCount += count;
+    }
+    return optionCount * pricePerItem[orderType];
+  }
 
-            const orderCountsMap = orderCounts(orderType);
-            orderCountsMap.set(itemName, parseInt(newItemCount));
+  useEffect(() => {
+    const productsTotal = calculateSubtotal("products", orderCounts);
+    const optionsTotal = calculateSubtotal("options", orderCounts);
+    const total = productsTotal + optionsTotal;
+    setTotals({
+      products: productsTotal,
+      options: optionsTotal,
+      total: total,
+    });
+  }, [orderCounts]);
 
-            setOrderCounts(newOrderCounts);
-        }
+  // 상품 주문 갯수가 변경될 때만 리렌더링이 되도록 useMemo 사용
+  const value = useMemo(() => {
+    // 상품, 주문 갯수의 변경을 업데이트 해주는 함수
+    function updateItemCount(itemName, newItemCount, orderType) {
+      const newOrderCounts = { ...orderCounts };
 
+      const orderCountsMap = orderCounts(orderType);
+      orderCountsMap.set(itemName, parseInt(newItemCount));
 
-        return [{...orderCounts}, updateItemCount]
+      setOrderCounts(newOrderCounts);
+    }
 
-    }, [orderCounts])
+    return [{ ...orderCounts, totals }, updateItemCount];
+  }, [orderCounts, totals]);
 
-
-
-    return <OrderContext.Provider value={value} {...props} />       
+  return <OrderContext.Provider value={value} {...props} />;
 }

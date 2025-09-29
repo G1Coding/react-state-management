@@ -41,13 +41,13 @@ export function OrderContextProvider(props) {
     });
   }, [orderCounts]);
 
-  // 상품 주문 갯수가 변경될 때만 리렌더링이 되도록 useMemo 사용
+  // 상품 주문 갯수, 총 가격이 변경될 때만 리렌더링이 되도록 useMemo 사용
   const value = useMemo(() => {
     // 상품, 주문 갯수의 변경을 업데이트 해주는 함수
     function updateItemCount(itemName, newItemCount, orderType) {
       const newOrderCounts = { ...orderCounts };
 
-      const orderCountsMap = orderCounts(orderType);
+      const orderCountsMap = orderCounts[orderType];
       orderCountsMap.set(itemName, parseInt(newItemCount));
 
       setOrderCounts(newOrderCounts);

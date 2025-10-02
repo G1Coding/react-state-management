@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './reducer';
 
 type Props = {
@@ -11,13 +11,18 @@ type Props = {
 
 function App({value, onIncrement, onDecrement} : Props) {
   const counter = useSelector((state: RootState) => state.counter);
-  const todos: string[] = useSelector((state: RootState) => state.todos)
+  const todos: string[] = useSelector((state: RootState) => state.todos);
+
+  //useDispatch
+  const dispatch = useDispatch();
+
   const [todoValue, setTodoValue] = useState("d");
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>{
     setTodoValue(e.target.value)
   }
   const addTodo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    dispatch({type: "ADD_TODO", text: todoValue})
     setTodoValue("");
   }
 
